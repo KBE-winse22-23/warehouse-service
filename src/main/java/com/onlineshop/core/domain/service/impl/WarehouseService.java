@@ -6,6 +6,7 @@ import com.onlineshop.core.domain.dto.UpdateProductQuantityDto;
 import com.onlineshop.core.domain.service.interfaces.IWarehouseService;
 import com.onlineshop.core.domain.service.interfaces.ProductRepository;
 import com.onlineshop.core.domain.service.interfaces.WarehouseRepository;
+import com.onlineshop.port.user.exception.NotFoundException;
 import com.onlineshop.port.user.producer.WarehouseProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,13 +33,13 @@ public class WarehouseService implements IWarehouseService {
     }
 
     @Override
-    public Warehouse deleteWarehouse(Long warehouseId) {
+    public Warehouse deleteWarehouse(Long warehouseId) throws NotFoundException {
         Optional<Warehouse> getWarehouseFromDB = warehouseRepository.findById(warehouseId);
 
         if(getWarehouseFromDB.isPresent()){
             warehouseRepository.delete(getWarehouseFromDB.get());
         }else{
-            throw new NullPointerException("Warehouse with id " + warehouseId + " not found!");
+            throw new NotFoundException("Warehouse with id " + warehouseId + " not found!");
         }
 
         return null;
@@ -50,7 +51,7 @@ public class WarehouseService implements IWarehouseService {
     }
 
     @Override
-    public Warehouse addProductToWarehouse(Product product, Long warehouseId) {
+    public Warehouse addProductToWarehouse(Product product, Long warehouseId) throws NotFoundException {
         Optional<Warehouse> getWarehouseFromDB = warehouseRepository.findById(warehouseId);
         Warehouse warehouse;
         if(getWarehouseFromDB.isPresent()){
@@ -60,14 +61,14 @@ public class WarehouseService implements IWarehouseService {
             warehouseRepository.save(warehouse);
             warehouseProducer.sendProductToProductService(product);
         }else{
-            throw new NullPointerException("Warehouse with id " + warehouseId + " not found!");
+            throw new NotFoundException("Warehouse with id " + warehouseId + " not found!");
         }
 
         return warehouse;
     }
 
     @Override
-    public Warehouse updateProductQuantity(UpdateProductQuantityDto updateProductQuantityDto) {
+    public Warehouse updateProductQuantity(UpdateProductQuantityDto updateProductQuantityDto) throws NotFoundException {
         Optional<Product> getProduct = productRepository.findByProductId(updateProductQuantityDto.getProductId());
 
         if(getProduct.isPresent() && Objects.equals(getProduct.get().getWarehouse().getWarehouseId(), updateProductQuantityDto.getWarehouseId())){
@@ -75,7 +76,7 @@ public class WarehouseService implements IWarehouseService {
             productRepository.save(getProduct.get());
             warehouseProducer.updateProductQuantityInProductService(getProduct.get());
         }else{
-            throw new IllegalArgumentException("Product or Warehouse not found!");
+            throw new NotFoundException("Product or Warehouse not found!");
         }
 
         return null;

@@ -1,4 +1,4 @@
-version: "3.9"
+version: "1.0"
 
 services:
   app:
@@ -10,21 +10,24 @@ services:
     ports:
       - "9003:9003"
     depends_on:
-      - postgres-warehouse
+      - database-warehouse
     volumes:
       - ./:/app/app
     links:
-      - postgres-warehouse
+      - database-warehouse
     networks:
       - internal
 
-  postgres-warehouse:
+  database-warehouse:
     image: postgres
-    container_name: postgres
+    container_name: database-warehouse
+    expose:
+      - "5432"
     ports:
       - "5432:5432"
     volumes:
       - ./:/app/
+    command: -p 5432
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
