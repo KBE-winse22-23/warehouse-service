@@ -17,6 +17,11 @@ services:
       - database-warehouse
     networks:
       - internal
+    environment:
+      - eureka.client.serviceUrl.defaultZone=http://eureka-server:8761/eureka/
+      - spring_rabbitmq_host=rabbitmq-container
+      - spring_rabbitmq_port=5672
+
 
   database-warehouse:
     image: postgres
